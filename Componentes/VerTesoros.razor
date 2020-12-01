@@ -1,0 +1,60 @@
+@using Data
+@using Tarea6_7.Servicios
+@inject IServicioTesoros TS
+
+<div>
+    <table class="table">
+        <thead>
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th>Valor</th>
+            <th>Detalles</th>
+        </thead>
+        <tbody>
+            @if(tesoros.Count > 0){
+                @foreach (Tesoros T in tesoros)
+                {
+                <tr>
+                    <td>@T.Nombre</td>
+                    <td>@T.Fecha.Day / @T.Fecha.Month / @T.Fecha.Year </td>
+                    <td>@T.Valor</td>
+                    <td><button  @onclick="()=>SetTesorosModal(T)"
+                        data-toggle="modal" data-target="#tesoroModalDetalles"
+                         class="btn btn-link">Ver Detalles</button></td>
+                </tr>   
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<ModalDetalles Id="@modalId" ts="@ModalT"/>
+
+@code 
+{
+    [Parameter]
+    public Guid UsuarioId {get; set;}
+
+    List<Tesoros> tesoros = new List<Tesoros>();
+    Tesoros ModalT = new Tesoros();
+    private string modalId = "tesoroModalDetalles";
+    private void SetTesorosModal(Tesoros t){
+        ModalT = t;
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        await Load();
+        StateHasChanged();    
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        StateHasChanged();
+        await Load();
+    }
+
+    private async Task Load(){
+            if(UsuarioId != null)
+            tesoros = await TS.GetAllTesoros(UsuarioId);
+    }
+}

@@ -1,0 +1,15 @@
+﻿@page "/"
+@using Tarea6_7.Componentes
+
+<AuthorizeView>
+    <Authorized>
+        <Principal>
+            
+        </Principal>
+    </Authorized>
+    <NotAuthorized>
+        <p class="h2">
+            Inicia seccion para ver el contenido de la página.
+        </p>
+    </NotAuthorized>
+</AuthorizeView>

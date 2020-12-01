@@ -1,0 +1,78 @@
+@using System.Drawing
+@using Data
+@using Microsoft.JSInterop
+@using Servicios
+@inject IServicioTesoros TS
+@inject IJSRuntime runtime
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+
+<style>
+    #vista-mapa, .map {
+    height: 90%;
+    width: 90%;
+    position: absolute !important;
+  }
+  .map-Container {
+      min-width: 80vmin;
+      width: 100%;
+      min-height: 90vmin;
+      height: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+  }
+</style>
+
+<div class="map-Container">
+    <div class="map" id="vista-mapa"></div>
+</div>
+<div id="modalDataEvent" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContentMap"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string TID {get; set;}
+
+    List<Coordenadas> coordenadas;
+    List<Tesoros> tesoros;
+   
+    protected override async Task OnAfterRenderAsync(bool firstRender){
+        if (firstRender){
+            if(TID != null)
+            await Load();
+        }
+    }
+
+    //protected override async void OnParametersSet(){ }
+
+    private async Task Load(){
+        if(TID != null && TID != ""){
+            coordenadas = await TS.GetAllCoordenadas(Guid.Parse(TID));
+            tesoros = await TS.GetAllTesoros(Guid.Parse(TID));
+            string json = JsonSerializer.Serialize(coordenadas.ToArray());
+            string TJson = JsonSerializer.Serialize(tesoros.ToArray());
+            await runtime.InvokeVoidAsync("initMap", json, 8, TJson);
+        }else{
+            await runtime.InvokeVoidAsync("initMap");
+        }
+
+    }
+    
+}
